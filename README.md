@@ -4,6 +4,8 @@ Players are only able to take from it, not put things in, a bit similar to the w
 
 To fill it, open it with a user who has the 'protection_bypass' privilege. This user will access the default inventory of the chest.
 
+![Just a chest, really](sc.png)
+
 The way this works under the hood is that each chest has an inventory that is only shown to admins with 'protection_bypass'. All others are shown a an inventory page that is actually attached to their player and that is initialized with the content of the default inventory. 
 
 Inspired by Megaf's more_chest wifi chest:
