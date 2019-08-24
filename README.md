@@ -1,4 +1,4 @@
-Chest whose content can only be taken from and that offers the same content to each player once. I wrote this because I made treasure hunting game. I wanted players to receive each a reward for finding the chest, not have a first-arrived-takes-all. 
+Chest whose content can only be taken from and that offers the same content to each player once. I wrote this because I made a treasure hunting game. I wanted each player to receive a reward once for finding the chest, not have a first-arrived-takes-all. 
 
 Players are only able to take from it, not put things in, a bit similar to the way bones work.
 

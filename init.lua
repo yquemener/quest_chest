@@ -36,7 +36,7 @@ minetest.register_node("quest_chest:chest", {
 		local meta = minetest.get_meta(pos)
     local chestid = quest_chests_storage:get_int("next_id")
     meta:set_string("chestid", chestid)
-    local ids = minetest.deserialize(quest_chests_storage:get_string("ids"))
+    local ids = minetest.deserialize(quest_chests_storage:get_string("ids") or "{}")
     table.insert(ids, chestid)
     quest_chests_storage:set_string("ids", minetest.serialize(ids))
     quest_chests_storage:set_int("next_id", chestid+1)
