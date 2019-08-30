@@ -23,22 +23,11 @@ minetest.register_node("quest_chest:chest", {
     local meta = minetest.get_meta(pos)
     local chestid = meta:get_int("chestid")
     print("Destroying chest_"..chestid)
-    local ids = minetest.deserialize(quest_chests_storage:get_string("ids"))
-    for index, value in pairs(ids) do
-      if value == chestid then
-          table.remove(ids, index)
-          break
-      end
-    end
-    quest_chests_storage:set_string("ids", minetest.serialize(ids))
   end,
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
     local chestid = quest_chests_storage:get_int("next_id")
     meta:set_string("chestid", chestid)
-    local ids = minetest.deserialize(quest_chests_storage:get_string("ids") or "{}")
-    table.insert(ids, chestid)
-    quest_chests_storage:set_string("ids", minetest.serialize(ids))
     quest_chests_storage:set_int("next_id", chestid+1)
 		meta:set_string("formspec",
 				"size[8,9]"..
@@ -68,9 +57,24 @@ minetest.register_node("quest_chest:chest", {
 	end,
   allow_metadata_inventory_put = function(pos, listname, index, stack, player)
     local playername = player:get_player_name()
-
     if minetest.check_player_privs(playername, "protection_bypass") then
       return stack:get_count()
+    else
+      return 0
+    end
+  end,
+  allow_metadata_inventory_take = function(pos, listname, index, stack, player)
+    local playername = player:get_player_name()
+    if minetest.check_player_privs(playername, "protection_bypass") then
+      return stack:get_count()
+    else
+      return 0
+    end
+  end,
+  allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
+    local playername = player:get_player_name()
+    if minetest.check_player_privs(playername, "protection_bypass") then
+      return count
     else
       return 0
     end
@@ -87,7 +91,7 @@ minetest.register_node("quest_chest:chest", {
       local inv = clicker:get_inventory()
       local chestname = "quest_chest:chest"..meta:get_int("chestid")
       if inv:get_size(chestname)==0 then
-        inv:set_size(chestname, 8)
+        inv:set_size(chestname, 8*2)
         inv:set_list(chestname, meta:get_inventory():get_list("main"))
       end
       minetest.show_formspec(clicker:get_player_name(),
@@ -110,38 +114,30 @@ minetest.register_node("quest_chest:chest", {
 	end,
 })
 
-minetest.register_on_joinplayer(function(player)
-  --[[ local ids = minetest.deserialize(quest_chests_storage:get_string("ids"))
-  local inv = player:get_inventory()
-  print(dump(inv:get_size("quest_chest:chest333")))
-  for i,chestid in ipairs(ids) do
-    inv:set_size("quest_chest:chest"..chestid, 8)
-  end ]]--
+minetest.register_on_player_inventory_action(
+  function(player, action, inventory, inventory_info)
+    local inv = player:get_inventory()
+    if inventory_info.from_list and inventory_info.from_index then
+      local stack = inv:get_stack(
+          inventory_info.from_list,
+          inventory_info.from_index
+      )
+    end
+  end)
+minetest.register_allow_player_inventory_action(
+  function(player, action, inventory, inventory_info)
+    local inv = player:get_inventory()
+    if inventory_info.from_list and inventory_info.from_index then
+      local stack = inv:get_stack(
+          inventory_info.from_list,
+          inventory_info.from_index
+      )
+      if string.sub(inventory_info.to_list,1,11)=="quest_chest" then
+        return 0
+      else
+        return stack:get_count()
+      end
+    end
+    return
+  end)
 
-  minetest.register_on_player_inventory_action(
-    function(player, action, inventory, inventory_info)
-      local inv = player:get_inventory()
-      if inventory_info.from_list and inventory_info.from_index then
-        local stack = inv:get_stack(
-            inventory_info.from_list,
-            inventory_info.from_index
-        )
-      end
-    end)
-  minetest.register_allow_player_inventory_action(
-    function(player, action, inventory, inventory_info)
-      local inv = player:get_inventory()
-      if inventory_info.from_list and inventory_info.from_index then
-        local stack = inv:get_stack(
-            inventory_info.from_list,
-            inventory_info.from_index
-        )
-        if string.sub(inventory_info.to_list,1,11)=="quest_chest" then
-          return 0
-        else
-          return stack:get_count()
-        end
-      end
-      return
-    end)
-end)
